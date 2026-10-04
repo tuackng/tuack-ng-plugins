@@ -1,0 +1,23 @@
+# ⚠️ 重建稿 —— 原文未留存，任何来源里都没有该文件的内容。
+#
+# 依据：
+#   * GitHub API 记录的仓库文件列表含 `pyproject.toml` 与 `uv.lock`
+#   * 仓库语言标记为 Python，许可证 MIT，描述「插件市场」
+#   * tools/*.py 的导入：除标准库外**只有 pydantic**（用到 ConfigDict /
+#     field_validator，属 pydantic v2）；用到 tomllib，故需 Python >= 3.11
+#   * tools/validate.py 的用法注释写明 `uv run python tools/validate.py`
+#   * flake.nix 的 devShell 提供 uv 与 python3
+#
+# 未确证、由上述推定：包名、版本号、requires-python 的具体下界。
+
+[project]
+name = "tuack-ng-plugins"
+version = "0.1.0"
+description = "Tuack-NG 插件市场索引工具"
+license = { text = "MIT" }
+requires-python = ">=3.11"
+dependencies = ["pydantic>=2"]
+
+# 工具脚本位于 tools/，不作为可安装包构建
+[tool.uv]
+package = false

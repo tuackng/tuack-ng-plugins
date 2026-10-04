@@ -1,0 +1,52 @@
+name: Build & Check Plugin Index
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "plugins/**"
+      - "tools/**"
+      - "index.json"
+      - "pyproject.toml"
+      - "uv.lock"
+      - ".github/workflows/ci.yml"
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *"
+
+permissions:
+  contents: write
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  index:
+    name: 校验并更新插件索引
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: 结构校验
+        run: uv run --frozen python tools/validate.py
+
+      - name: 联网校验
+        run: uv run --frozen python tools/validate.py --fetch
+
+      # PR 只校验、不改索引
+      - name: 重建索引
+        if: github.event_name != 'pull_request'
+        run: uv run --frozen python tools/build_index.py
+
+      - name: 提交索引
+        if: github.event_name != 'pull_request'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: 更新插件索引"
+          file_pattern: index.json
+          commit_user_name: github-actions[bot]
+          commit_user_email: 41898282+github-actions[bot]@users.noreply.github.com
